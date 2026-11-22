@@ -1,0 +1,26 @@
+name: Member app - build and send to TestFlight
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "App version (for example 1.0)"
+        required: true
+        default: "1.0"
+  push:
+    branches: [main]
+    paths:
+      - member-app.zip
+jobs:
+  build:
+    runs-on: macos-26
+    timeout-minutes: 40
+    env:
+      APP_VERSION: ${{ inputs.version || '1.0' }}
+      BUILD_NUMBER: ${{ github.run_number }}
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+    steps:
+      - uses: actions/checkout@v4
+      - run: mkdir member-app && unzip -o -q member-app.zip -d member-app && cd member-app && bash ci/build.sh
